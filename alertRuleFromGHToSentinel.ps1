@@ -99,13 +99,20 @@ function New-SingleAlertRuleFromGitHub {
     {
         $QueryFrequency = New-TimeSpan -hours $yaml.queryFrequency.replace("h","")
     }
+    
+    # get the alert rule kind
+
+    # if($yaml.kind.contains("Scheduled")) {
+    #     $QueryKind = "Scheduled"
+    # }
+
     # lookup compare parameter
     $cp = $compHT[$yaml.TriggerOperator]
     if($existingRules.DisplayName -notcontains $yaml.name)
     {
         write-host creating new rule: $rDisplayName ... -ForegroundColor Green
         $query = $yaml.Query
-        New-AzSentinelAlertRule -ResourceGroupName $resourceGroupName -WorkspaceName $workspaceName -Scheduled -Enabled -description $yaml.description -DisplayName $yaml.name -Severity $yaml.Severity -Query $query -QueryFrequency $QueryFrequency -QueryPeriod $QueryPeriod -TriggerThreshold $yaml.TriggerThreshold -TriggerOperator $cp
+        New-AzSentinelAlertRule -ResourceGroupName $resourceGroupName -WorkspaceName $workspaceName -kind $yaml.kind -Enabled -description $yaml.description -DisplayName $yaml.name -Severity $yaml.Severity -Tactic $yaml.tactics -Query $query -QueryFrequency $QueryFrequency -QueryPeriod $QueryPeriod -TriggerThreshold $yaml.TriggerThreshold -TriggerOperator $cp -CreateIncident 
         $rDisplayName = $yaml.name
         Write-Output "Rule created:" $rDisplayName
     }
